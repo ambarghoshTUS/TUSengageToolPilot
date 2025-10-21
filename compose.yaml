@@ -1,0 +1,155 @@
+# Docker Compose file for TUS Engage Tool Pilot
+# Uses modern Compose Specification (docker compose v2)
+# Platform: Ubuntu 24.04 LTS deployment ready
+
+services:
+  # PostgreSQL Database Service
+  database:
+    image: postgres:16-alpine
+    container_name: tus_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-tus_engage_db}
+      POSTGRES_USER: ${DB_USER:-tusadmin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_secure_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - tus_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tusadmin} -d ${DB_NAME:-tus_engage_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Data Submission Service (Flask)
+  submission_service:
+    build:
+      context: ./services/submission
+      dockerfile: Dockerfile
+    container_name: tus_submission_service
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: ${FLASK_ENV:-production}
+      DATABASE_URL: postgresql://${DB_USER:-tusadmin}:${DB_PASSWORD:-changeme_secure_password}@database:5432/${DB_NAME:-tus_engage_db}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme_jwt_secret_key}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
+      ALLOWED_EXTENSIONS: "xlsx,xls,csv,tsv"
+    volumes:
+      - ./services/submission:/app
+      - submission_uploads:/app/uploads
+      - submission_templates:/app/templates/upload_templates
+    ports:
+      - "5001:5000"
+    networks:
+      - tus_network
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Dashboard Service - Executive Level (Group 1)
+  dashboard_executive:
+    build:
+      context: ./services/dashboards/executive
+      dockerfile: Dockerfile
+    container_name: tus_dashboard_executive
+    restart: unless-stopped
+    environment:
+      DASH_ENV: ${DASH_ENV:-production}
+      DATABASE_URL: postgresql://${DB_USER:-tusadmin}:${DB_PASSWORD:-changeme_secure_password}@database:5432/${DB_NAME:-tus_engage_db}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme_jwt_secret_key}
+      DASHBOARD_TITLE: "TUS Executive Dashboard"
+      USER_GROUP: "executive"
+    volumes:
+      - ./services/dashboards/executive:/app
+    ports:
+      - "8051:8050"
+    networks:
+      - tus_network
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Dashboard Service - Staff Level (Group 2)
+  dashboard_staff:
+    build:
+      context: ./services/dashboards/staff
+      dockerfile: Dockerfile
+    container_name: tus_dashboard_staff
+    restart: unless-stopped
+    environment:
+      DASH_ENV: ${DASH_ENV:-production}
+      DATABASE_URL: postgresql://${DB_USER:-tusadmin}:${DB_PASSWORD:-changeme_secure_password}@database:5432/${DB_NAME:-tus_engage_db}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme_jwt_secret_key}
+      DASHBOARD_TITLE: "TUS Staff Dashboard"
+      USER_GROUP: "staff"
+    volumes:
+      - ./services/dashboards/staff:/app
+    ports:
+      - "8052:8050"
+    networks:
+      - tus_network
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Dashboard Service - Public Level (Group 3)
+  dashboard_public:
+    build:
+      context: ./services/dashboards/public
+      dockerfile: Dockerfile
+    container_name: tus_dashboard_public
+    restart: unless-stopped
+    environment:
+      DASH_ENV: ${DASH_ENV:-production}
+      DATABASE_URL: postgresql://${DB_USER:-tusadmin}:${DB_PASSWORD:-changeme_secure_password}@database:5432/${DB_NAME:-tus_engage_db}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme_jwt_secret_key}
+      DASHBOARD_TITLE: "TUS Public Dashboard"
+      USER_GROUP: "public"
+    volumes:
+      - ./services/dashboards/public:/app
+    ports:
+      - "8053:8050"
+    networks:
+      - tus_network
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# Named volumes for persistent data
+volumes:
+  postgres_data:
+    driver: local
+  submission_uploads:
+    driver: local
+  submission_templates:
+    driver: local
+
+# Custom network for inter-service communication
+networks:
+  tus_network:
+    driver: bridge

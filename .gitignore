@@ -1,0 +1,140 @@
+# .gitignore for TUS Engage Tool Pilot
+
+# ============================================
+# SECURITY - Never commit sensitive files
+# ============================================
+.env
+*.key
+*.pem
+*.crt
+secrets/
+credentials/
+
+# ============================================
+# PYTHON
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.venv
+venv/
+ENV/
+env/
+.env/
+
+# ============================================
+# JUPYTER NOTEBOOK
+# ============================================
+.ipynb_checkpoints
+*.ipynb
+
+# ============================================
+# DATABASE
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.sql.gz
+postgres_data/
+migrations/versions/*.pyc
+
+# ============================================
+# DOCKER
+# ============================================
+docker-compose.override.yml
+.dockerignore
+
+# ============================================
+# UPLOADS AND TEMPORARY FILES
+# ============================================
+uploads/
+temp/
+tmp/
+*.tmp
+*.log
+logs/
+*.csv
+*.xlsx
+*.xls
+*.tsv
+!templates/**/*.xlsx
+!templates/**/*.csv
+!templates/**/*.tsv
+
+# ============================================
+# IDE AND EDITORS
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================
+# TESTING
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# NODE.JS (if used for frontend)
+# ============================================
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# ============================================
+# BACKUP FILES
+# ============================================
+*.bak
+*.backup
+*.old
