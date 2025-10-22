@@ -103,7 +103,8 @@ def create_app(config_class=Config):
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         """Remove database session at the end of request"""
-        db_session.remove()
+        if db_session:
+            db_session.remove()
     
     logger.info("Submission service initialized successfully")
     return app

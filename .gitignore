@@ -138,3 +138,11 @@ yarn.lock
 *.bak
 *.backup
 *.old
+
+# ============================================
+# DEVELOPMENT LOGS AND NOTES
+# ============================================
+DEVELOPMENT_LOG.md
+development_log.md
+dev_notes.md
+session_log.md

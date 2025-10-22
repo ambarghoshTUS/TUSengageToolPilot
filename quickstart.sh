@@ -119,15 +119,15 @@ echo ""
 echo "Checking service health..."
 
 services=(
-    "http://localhost:5001/health:Submission Service"
-    "http://localhost:8051/health:Executive Dashboard"
-    "http://localhost:8052/health:Staff Dashboard"
-    "http://localhost:8053/health:Public Dashboard"
+    "http://localhost:5001/health|Submission Service"
+    "http://localhost:8051/health|Executive Dashboard"
+    "http://localhost:8052/health|Staff Dashboard"
+    "http://localhost:8053/health|Public Dashboard"
 )
 
 all_healthy=true
 for service in "${services[@]}"; do
-    IFS=':' read -r url name <<< "$service"
+    IFS='|' read -r url name <<< "$service"
     response=$(curl -s -o /dev/null -w "%{http_code}" $url 2>/dev/null || echo "000")
     
     if [ "$response" -eq 200 ]; then

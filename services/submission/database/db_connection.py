@@ -82,6 +82,10 @@ def init_db():
         # Bind base to session query property
         Base.query = db_session.query_property()
         
+        # Register event listeners
+        event.listens_for(engine, "connect", insert=True)(receive_connect)
+        event.listens_for(engine, "checkin", insert=True)(receive_checkin)
+        
         logger.info("Database session initialized successfully")
         
     except Exception as e:
@@ -126,14 +130,12 @@ def close_db():
         logger.info("Database engine disposed")
 
 
-# Event listeners for connection management
-@event.listens_for(engine, "connect", insert=True) if engine else lambda: None
+# Event listener functions (will be registered after engine creation)
 def receive_connect(dbapi_conn, connection_record):
     """Set connection parameters on connect"""
     logger.debug("Database connection opened")
 
 
-@event.listens_for(engine, "checkin", insert=True) if engine else lambda: None
 def receive_checkin(dbapi_conn, connection_record):
     """Handle connection checkin"""
     logger.debug("Database connection returned to pool")
