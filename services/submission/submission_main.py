@@ -62,6 +62,10 @@ def create_app(config_class=Config):
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(submission_bp, url_prefix='/api/submission')
     
+    # Register web interface blueprint
+    from routes.web_routes import web_bp
+    app.register_blueprint(web_bp)
+    
     # Health check endpoint
     @app.route('/health', methods=['GET'])
     def health_check():
@@ -72,10 +76,10 @@ def create_app(config_class=Config):
             'version': '1.0.0'
         }), 200
     
-    # Root endpoint
-    @app.route('/', methods=['GET'])
-    def index():
-        """Root endpoint with API information"""
+    # Root endpoint - redirect to web interface
+    @app.route('/api', methods=['GET'])
+    def api_info():
+        """API information endpoint"""
         return jsonify({
             'service': 'TUS Engage Tool - Data Submission Service',
             'version': '1.0.0',

@@ -12,6 +12,7 @@ License: See LICENSE file
 
 import os
 import logging
+import base64
 from datetime import datetime, timedelta
 import dash
 from dash import dcc, html, Input, Output, State, callback
@@ -56,7 +57,7 @@ app = dash.Dash(
     url_base_pathname='/dashboard/',
     external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME],
     suppress_callback_exceptions=True,
-    title='TUS Executive Dashboard'
+    title='TUS-Engage Executive Dashboard'
 )
 
 
@@ -164,7 +165,7 @@ def create_navbar():
         dbc.Container([
             dbc.Row([
                 dbc.Col(html.Img(src="/assets/logo.png", height="40px") if os.path.exists("assets/logo.png") else None),
-                dbc.Col(dbc.NavbarBrand("TUS Executive Dashboard", className="ms-2")),
+                dbc.Col(dbc.NavbarBrand("TUS-Engage Executive Dashboard", className="ms-2")),
             ], align="center", className="g-0"),
             dbc.NavbarToggler(id="navbar-toggler"),
             dbc.Collapse(
@@ -177,9 +178,10 @@ def create_navbar():
                 navbar=True,
             ),
         ], fluid=True),
-        color="primary",
+        color="dark",
         dark=True,
-        className="mb-4"
+        className="mb-4",
+        style={"background": "linear-gradient(90deg, #000000, #a39461)"}
     )
 
 
@@ -225,6 +227,26 @@ def create_summary_cards(stats):
 
 
 app.layout = dbc.Container([
+    # Custom CSS for TUS-Engage branding
+    html.Link(
+        rel='stylesheet',
+        href='data:text/css;base64,' + base64.b64encode("""
+        .card-header { 
+            background: linear-gradient(90deg, #000000, #a39461) !important; 
+            color: white !important; 
+        }
+        .btn-primary { 
+            background-color: #000000 !important; 
+            border-color: #000000 !important; 
+        }
+        .btn-primary:hover { 
+            background-color: #a39461 !important; 
+            border-color: #a39461 !important; 
+        }
+        h4, h5 { color: #000000 !important; }
+        """.encode()).decode()
+    ),
+    
     # Store for data
     dcc.Store(id='dashboard-data-store'),
     dcc.Interval(id='interval-component', interval=60*1000, n_intervals=0),  # Update every minute

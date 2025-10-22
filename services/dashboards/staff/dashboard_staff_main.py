@@ -7,6 +7,7 @@ Displays moderated data views appropriate for staff-level access.
 
 import os
 import logging
+import base64
 from datetime import datetime
 import dash
 from dash import dcc, html, Input, Output
@@ -35,7 +36,7 @@ app = dash.Dash(
     server=server,
     url_base_pathname='/dashboard/',
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    title='TUS Staff Dashboard'
+    title='TUS-Engage Staff Dashboard'
 )
 
 @server.route('/health', methods=['GET'])
@@ -51,9 +52,47 @@ def load_data():
         return pd.DataFrame()
 
 app.layout = dbc.Container([
-    html.H1("TUS Staff Dashboard", className="my-4"),
-    html.P("Medium-detail analytics for staff and researchers"),
-    dcc.Graph(id='staff-chart'),
+    # Custom CSS for TUS-Engage branding
+    html.Link(
+        rel='stylesheet',
+        href='data:text/css;base64,' + base64.b64encode("""
+        .navbar { background: linear-gradient(90deg, #000000, #a39461) !important; }
+        .card-header { 
+            background: linear-gradient(90deg, #000000, #a39461) !important; 
+            color: white !important; 
+        }
+        .btn-primary { 
+            background-color: #000000 !important; 
+            border-color: #000000 !important; 
+        }
+        .btn-primary:hover { 
+            background-color: #a39461 !important; 
+            border-color: #a39461 !important; 
+        }
+        h1, h2, h3, h4, h5 { color: #000000 !important; }
+        """.encode()).decode()
+    ),
+    
+    # Navigation Bar
+    dbc.Navbar(
+        dbc.Container([
+            dbc.NavbarBrand("TUS-Engage Staff Dashboard", className="ms-2"),
+        ]),
+        color="dark",
+        dark=True,
+        className="mb-4",
+        style={"background": "linear-gradient(90deg, #000000, #a39461)"}
+    ),
+    
+    # Main Content
+    dbc.Card([
+        dbc.CardHeader(html.H4("Staff Analytics Dashboard", className="mb-0")),
+        dbc.CardBody([
+            html.P("Medium-detail analytics for staff and researchers", className="text-muted"),
+            dcc.Graph(id='staff-chart'),
+        ])
+    ], className="shadow"),
+    
     dcc.Interval(id='interval', interval=60000)
 ])
 
